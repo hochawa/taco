@@ -19,6 +19,7 @@
 #include "taco/codegen/module.h"
 #include "codegen/codegen_c.h"
 #include "codegen/codegen_cuda.h"
+#include "codegen/codegen_spatial.h"
 #include "codegen/codegen.h"
 #include "taco/util/strings.h"
 #include "taco/util/files.h"
@@ -27,6 +28,7 @@
 #include "taco/util/env.h"
 #include "taco/util/collections.h"
 #include "taco/cuda.h"
+#include "taco/spatial.h"
 #include <taco/index_notation/transformations.h>
 
 using namespace std;
@@ -179,6 +181,8 @@ static void printUsageInfo() {
   cout << endl;
   printFlag("cuda", "Generate CUDA code for NVIDIA GPUs");
   cout << endl;
+  printFlag("spatial", "Generate Spatial DSL code for FPGAs or Plasticine");
+  cout << endl;
   printFlag("schedule", "Specify parallel execution schedule");
   cout << endl;
   printFlag("nthreads", "Specify number of threads for parallel execution");
@@ -227,6 +231,7 @@ int main(int argc, char* argv[]) {
   bool color               = true;
   bool readKernels         = false;
   bool cuda                = false;
+  bool spatial             = false;
 
   ParallelSchedule sched = ParallelSchedule::Static;
   int chunkSize = 0;
@@ -510,6 +515,9 @@ int main(int argc, char* argv[]) {
     else if ("-cuda" == argName) {
       cuda = true;
     }
+    else if ("-spatial" == argName) {
+      spatial = true;
+    }
     else if ("-schedule" == argName) {
       vector<string> descriptor = util::split(argValue, ",");
       if (descriptor.size() > 2 || descriptor.empty()) {
@@ -631,6 +639,8 @@ int main(int argc, char* argv[]) {
   else {
     set_CUDA_codegen_enabled(false);
   }
+
+  set_Spatial_codegen_enabled(spatial);
 
   ir::Stmt assemble;
   ir::Stmt compute;
